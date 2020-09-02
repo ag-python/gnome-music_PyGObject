@@ -44,8 +44,8 @@ class GrlTrackerWrapper(GObject.GObject):
         Grl.METADATA_KEY_ARTIST,
         Grl.METADATA_KEY_ALBUM_ARTIST,
         Grl.METADATA_KEY_COMPOSER,
-        Grl.METADATA_KEY_CREATION_DATE,
         Grl.METADATA_KEY_ID,
+        Grl.METADATA_KEY_PUBLICATION_DATE,
         Grl.METADATA_KEY_TITLE,
         Grl.METADATA_KEY_URL
     ]
@@ -197,7 +197,7 @@ class GrlTrackerWrapper(GObject.GObject):
         query = """
         SELECT
             ?type ?id ?title ?composer ?albumArtist
-            ?artist ?url ?creationDate
+            ?artist ?url ?publicationDate
         WHERE {
             SERVICE <dbus:%(miner_fs_busname)s> {
                 GRAPH tracker:Audio {
@@ -209,7 +209,8 @@ class GrlTrackerWrapper(GObject.GObject):
                         ?albumArtist
                         nmm:artistName(?artist) AS ?artist
                         nie:isStoredAs(?song) AS ?url
-                        YEAR(MAX(nie:contentCreated(?song))) AS ?creationDate
+                        YEAR(MAX(nie:contentCreated(?song)))
+                            AS ?publicationDate
                     WHERE {
                         ?album a nmm:MusicAlbum .
                         ?song a nmm:MusicPiece ;
@@ -533,7 +534,7 @@ class GrlTrackerWrapper(GObject.GObject):
         query = """
         SELECT
             ?type ?id ?title ?composer ?albumArtist
-            ?artist ?url ?creationDate
+            ?artist ?url ?publicationDate
         WHERE
         {
             SERVICE <dbus:%(miner_fs_busname)s> {
@@ -546,7 +547,8 @@ class GrlTrackerWrapper(GObject.GObject):
                         ?albumArtist
                         nmm:artistName(?artist) AS ?artist
                         nie:isStoredAs(?song) AS ?url
-                        YEAR(MAX(nie:contentCreated(?song))) AS ?creationDate
+                        YEAR(MAX(nie:contentCreated(?song)))
+                            AS ?publicationDate
                     WHERE
                     {
                         ?album a nmm:MusicAlbum .
@@ -560,7 +562,7 @@ class GrlTrackerWrapper(GObject.GObject):
                         %(location_filter)s
                     }
                     GROUP BY ?album
-                    ORDER BY ?title ?albumArtist ?artist ?creationDate
+                    ORDER BY ?title ?albumArtist ?artist ?publicationDate
                 }
             }
         }
@@ -649,7 +651,7 @@ class GrlTrackerWrapper(GObject.GObject):
 
         query = """
         SELECT
-            ?type ?id ?title ?creationDate
+            ?type ?id ?title ?publicationDate
         WHERE {
             SERVICE <dbus:%(miner_fs_busname)s> {
                 GRAPH tracker:Audio {
@@ -657,7 +659,7 @@ class GrlTrackerWrapper(GObject.GObject):
                         %(media_type)s AS ?type
                         ?album AS ?id
                         nie:title(?album) AS ?title
-                        nie:contentCreated(?song) AS ?creationDate
+                        nie:contentCreated(?song) AS ?publicationDate
                     WHERE {
                         ?album a nmm:MusicAlbum .
                         OPTIONAL { ?album  nmm:albumArtist ?album_artist . }
@@ -669,7 +671,7 @@ class GrlTrackerWrapper(GObject.GObject):
                         %(location_filter)s
                     }
                    GROUP BY ?album
-                   ORDER BY ?creationDate ?album
+                   ORDER BY ?publicationDate ?album
                 }
             }
         }
@@ -777,7 +779,7 @@ class GrlTrackerWrapper(GObject.GObject):
             ?type ?id ?url ?title
             ?artist ?album
             ?duration ?trackNumber ?albumDiscNumber
-            ?creationDate
+            ?publicationDate
             nie:usageCounter(?id) AS ?playCount
             ?tag AS ?favorite
         WHERE {
@@ -794,7 +796,7 @@ class GrlTrackerWrapper(GObject.GObject):
                         nmm:trackNumber(?song) AS ?trackNumber
                         nmm:setNumber(nmm:musicAlbumDisc(?song))
                             AS ?albumDiscNumber
-                        YEAR(?date) AS ?creationDate
+                        YEAR(?date) AS ?publicationDate
                     WHERE {
                         ?song a nmm:MusicPiece ;
                                 nmm:musicAlbum ?album .
